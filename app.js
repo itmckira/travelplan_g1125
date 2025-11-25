@@ -171,6 +171,20 @@ function saveStateToStorage() {
   }
 }
 
+// 刪除單一行程
+function deleteItem(id) {
+  const index = state.items.findIndex((it) => it.id === id);
+  if (index === -1) return;
+
+  state.items.splice(index, 1);
+  saveStateToStorage();
+  render();
+  // 刪除也要自動同步到 Google Sheet
+  if (typeof scheduleAutoSync === "function") {
+    scheduleAutoSync();
+  }
+}
+
 // 從 localStorage 載入
 function loadStateFromStorage() {
   try {
@@ -292,44 +306,65 @@ function render() {
     group.appendChild(header);
 
     byDate[date].forEach((item) => {
-      const card = document.createElement("div");
-      card.className = "item-card";
+	  const card = document.createElement("div");
+	  card.className = "item-card";
 
-      const headerRow = document.createElement("div");
-      headerRow.className = "item-header";
+	  const headerRow = document.createElement("div");
+	  headerRow.className = "item-header";
 
-      const timeEl = document.createElement("div");
-      timeEl.className = "item-time";
-      timeEl.textContent = item.time || "—";
+	  const timeEl = document.createElement("div");
+	  timeEl.className = "item-time";
+	  timeEl.textContent = item.time || "—";
 
-      const mainInfo = document.createElement("div");
-      mainInfo.style.flex = "1 1 auto";
+	  // 左邊：標題 + 地點
+	  const mainInfo = document.createElement("div");
+	  mainInfo.style.flex = "1 1 auto";
 
-      const titleEl = document.createElement("div");
-      titleEl.className = "item-title";
-      titleEl.textContent = item.title;
+	  const titleEl = document.createElement("div");
+	  titleEl.className = "item-title";
+	  titleEl.textContent = item.title;
 
-      const locationEl = document.createElement("div");
-      locationEl.className = "item-location";
-      locationEl.textContent = item.location;
+	  const locationEl = document.createElement("div");
+	  locationEl.className = "item-location";
+	  locationEl.textContent = item.location;
 
-      mainInfo.appendChild(titleEl);
-      if (item.location) mainInfo.appendChild(locationEl);
+	  mainInfo.appendChild(titleEl);
+	  if (item.location) mainInfo.appendChild(locationEl);
 
-      headerRow.appendChild(timeEl);
-      headerRow.appendChild(mainInfo);
+	  // 右邊：操作按鈕區（目前只有刪除）
+	  const actionsEl = document.createElement("div");
+	  actionsEl.className = "item-actions";
 
-      card.appendChild(headerRow);
+	  const delBtn = document.createElement("button");
+	  delBtn.type = "button";
+	  delBtn.textContent = "刪除";
+	  delBtn.className = "item-delete-btn";
+	  delBtn.addEventListener("click", () => {
+		const ok = confirm(`確定要刪除這筆行程嗎？\n\n[${item.date} ${item.time || ""}]\n${item.title}`);
+		if (ok) {
+		  deleteItem(item.id);
+		}
+	  });
 
-      if (item.note) {
-        const noteEl = document.createElement("div");
-        noteEl.className = "item-note";
-        noteEl.textContent = item.note;
-        card.appendChild(noteEl);
-      }
+	  actionsEl.appendChild(delBtn);
 
-      group.appendChild(card);
-    });
+	  // headerRow：時間 / 主資訊 / 操作按鈕
+	  headerRow.appendChild(timeEl);
+	  headerRow.appendChild(mainInfo);
+	  headerRow.appendChild(actionsEl);
+
+	  card.appendChild(headerRow);
+
+	  if (item.note) {
+		const noteEl = document.createElement("div");
+		noteEl.className = "item-note";
+		noteEl.textContent = item.note;
+		card.appendChild(noteEl);
+	  }
+
+	  group.appendChild(card);
+	});
+
 
     container.appendChild(group);
   });

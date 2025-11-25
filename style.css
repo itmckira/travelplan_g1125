@@ -196,6 +196,29 @@ button:hover {
   color: #555;
 }
 
+/* ✅ 新增：每筆行程右側的小操作區（刪除按鈕） */
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 4px;
+}
+
+.item-delete-btn {
+  border-radius: 999px;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  color: #b91c1c;
+  cursor: pointer;
+}
+
+.item-delete-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
 .item-note {
   margin-top: 4px;
   font-size: 0.85rem;
