@@ -231,6 +231,32 @@ function formatTime(date) {
   return `${hh}:${mm}:${ss}`;
 }
 
+// 顯示用日期：例如 "2025-11-04" -> "11/04（二）"
+function formatDisplayDate(dateStr) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) {
+    // 如果無法被 Date 解析，就直接原樣顯示
+    return dateStr;
+  }
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  const weekdayNames = ["日", "一", "二", "三", "四", "五", "六"];
+  const w = weekdayNames[d.getDay()];
+  return `${mm}/${dd}（${w}）`;
+}
+
+// 顯示用時間：確保是 HH:MM，沒填就顯示 "—"
+function formatDisplayTime(timeStr) {
+  if (!timeStr) return "—";
+  // 預期輸入是 "HH:MM"，若不符合就原樣
+  const parts = timeStr.split(":");
+  if (parts.length < 2) return timeStr;
+  const hh = parts[0].padStart(2, "0");
+  const mm = parts[1].padStart(2, "0");
+  return `${hh}:${mm}`;
+}
+
 
 // 排程自動同步googl sheet（避免每次 key 一下就狂打 API）
 function scheduleAutoSync() {
@@ -270,11 +296,12 @@ function render() {
 
   // 過濾當日
   if (currentFilterDate) {
-    items = items.filter((it) => it.date === currentFilterDate);
-    listTitleEl.textContent = `行程列表（${currentFilterDate}）`;
-  } else {
-    listTitleEl.textContent = "行程列表（全部）";
-  }
+	items = items.filter((it) => it.date === currentFilterDate);
+	listTitleEl.textContent = `行程列表（${formatDisplayDate(currentFilterDate)}）`;
+	} else {
+	listTitleEl.textContent = "行程列表（全部）";
+	}
+
 
   if (items.length === 0) {
     const empty = document.createElement("div");
@@ -306,8 +333,9 @@ function render() {
     header.className = "date-group-header";
 
     const title = document.createElement("div");
-    title.className = "date-group-title";
-    title.textContent = date;
+	title.className = "date-group-title";
+	title.textContent = formatDisplayDate(date);
+
 
     const count = document.createElement("div");
     count.className = "date-group-count";
@@ -326,7 +354,8 @@ function render() {
 
 	  const timeEl = document.createElement("div");
 	  timeEl.className = "item-time";
-	  timeEl.textContent = item.time || "—";
+      timeEl.textContent = formatDisplayTime(item.time);
+
 
 	  // 左邊：標題 + 地點
 	  const mainInfo = document.createElement("div");
