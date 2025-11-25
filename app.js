@@ -288,6 +288,9 @@ function render() {
   //let items = [...state.items];
   let items = state.items.filter((it) => !it.deleted);
   
+  // ★ 依 ID 只保留最新的那一筆
+  items = dedupeLatestById(items);
+  
   // 依日期 + 時間排序
   items.sort((a, b) => {
     if (a.date !== b.date) return a.date.localeCompare(b.date);
@@ -545,6 +548,34 @@ function mergeLocalAndRemote(localState, remoteState) {
     items: mergedItems
   };
 }
+
+// 依 ID 只保留 updatedAt 最新的那一筆
+function dedupeLatestById(items) {
+  const map = new Map();
+
+  function getTime(it) {
+    return it && it.updatedAt
+      ? it.updatedAt
+      : "1970-01-01T00:00:00.000Z";
+  }
+
+  items.forEach((it) => {
+    if (!it.id) return;
+    const existing = map.get(it.id);
+    if (!existing) {
+      map.set(it.id, it);
+    } else {
+      const tNew = getTime(it);
+      const tOld = getTime(existing);
+      if (tNew >= tOld) {
+        map.set(it.id, it);
+      }
+    }
+  });
+
+  return Array.from(map.values());
+}
+
 
 async function fullSyncWithMerge(isAuto = false) {
   if (!GOOGLE_WEBAPP_URL || GOOGLE_WEBAPP_URL.indexOf("script.google.com") === -1) {
