@@ -25,6 +25,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const clearFilterBtn = document.getElementById("clearFilterBtn");
   const exportJsonBtn = document.getElementById("exportJsonBtn");
   const importJsonInput = document.getElementById("importJsonInput");
+  
+  const clearLocalBtn = document.getElementById("clearLocalBtn");
+	clearLocalBtn.addEventListener("click", () => {
+  const ok = confirm("確定要清空本機的所有行程資料嗎？\n（雲端不會被刪除）");
+  if (!ok) return;
+
+  localStorage.removeItem(STORAGE_KEY);
+  state = { tripName: "", items: [] };
+
+  render();
+  setSyncStatus("本機資料已清空", "ok");
+});
+
+  
   const syncSheetBtn = document.getElementById("syncSheetBtn");
   syncStatusEl = document.getElementById("syncStatus");   // 同步狀態列
   
@@ -32,9 +46,6 @@ document.addEventListener("DOMContentLoaded", () => {
 	syncSheetBtn.addEventListener("click", () => {
 	  fullSyncWithMerge(false);  // ★ 改成「雙向合併同步」
 	});
-
-
-
   
   loadStateFromStorage();
   render();
