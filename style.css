@@ -148,23 +148,44 @@ button:hover {
 .date-group {
   border-left: 4px solid #0077ff;
   padding-left: 10px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-radius: 8px;
 }
 
-.date-group-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 4px;
+/* 每個日期群組的配色（同一天用同一色） */
+.date-group.date-color-0 {
+  border-left-color: #3b82f6;
 }
 
-.date-group-title {
-  font-weight: 600;
+.date-group.date-color-0 .item-card {
+  background: #eff6ff;
 }
 
-.date-group-count {
-  font-size: 0.8rem;
-  color: #666;
+.date-group.date-color-1 {
+  border-left-color: #10b981;
 }
+
+.date-group.date-color-1 .item-card {
+  background: #ecfdf3;
+}
+
+.date-group.date-color-2 {
+  border-left-color: #f59e0b;
+}
+
+.date-group.date-color-2 .item-card {
+  background: #fffbeb;
+}
+
+.date-group.date-color-3 {
+  border-left-color: #8b5cf6;
+}
+
+.date-group.date-color-3 .item-card {
+  background: #f5f3ff;
+}
+
 
 .item-card {
   background: #f9fafb;

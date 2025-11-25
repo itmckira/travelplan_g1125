@@ -285,10 +285,14 @@ function render() {
     byDate[it.date].push(it);
   });
 
-  const dates = Object.keys(byDate).sort();
-  dates.forEach((date) => {
+	const dates = Object.keys(byDate).sort();
+	dates.forEach((date, idx) => {
     const group = document.createElement("div");
     group.className = "date-group";
+
+    // 根據日期順序輪流上顏色，同一天共用同一色
+    const colorIndex = idx % 4; // 對應 CSS 的 date-color-0 ~ 3
+    group.classList.add(`date-color-${colorIndex}`);
 
     const header = document.createElement("div");
     header.className = "date-group-header";
