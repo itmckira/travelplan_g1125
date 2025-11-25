@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>旅遊計畫紀錄 Travel Planner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <h1>旅遊計畫紀錄</h1>
+      <input
+        id="tripNameInput"
+        type="text"
+        placeholder="此行旅遊名稱，例如：2025 浙江五日遊"
+      />
+    </header>
+
+    <!-- 上方控制列：日期過濾 + 匯入匯出 -->
+    <section class="toolbar">
+      <div class="toolbar-group">
+        <label for="filterDate">查看某一天：</label>
+        <input id="filterDate" type="date" />
+        <button id="clearFilterBtn" type="button">顯示全部日期</button>
+      </div>
+
+      <div class="toolbar-group">
+        <button id="exportJsonBtn" type="button">匯出 JSON</button>
+
+        <label class="import-label">
+          匯入 JSON
+          <input id="importJsonInput" type="file" accept="application/json" />
+        </label>
+		<!-- ✅ 新增：同步按鈕 -->
+		<button id="syncSheetBtn" type="button">同步到 Google Sheet</button>
+      </div>
+    </section>
+
+    <!-- 新增行程表單 -->
+    <section class="card">
+      <h2>新增行程</h2>
+      <form id="itemForm">
+        <div class="form-row">
+          <div class="form-field">
+            <label for="date">日期</label>
+            <input id="date" type="date" required />
+          </div>
+          <div class="form-field">
+            <label for="time">時間</label>
+            <input id="time" type="time" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label for="title">行程標題</label>
+            <input id="title" type="text" placeholder="例如：飛往上海、入住飯店…" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label for="location">地點</label>
+            <input id="location" type="text" placeholder="例如：桃園機場、台州、廟口夜市…" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label for="note">備註</label>
+            <textarea id="note" rows="2" placeholder="例如：記得帶護照、提早 2 小時到機場"></textarea>
+          </div>
+        </div>
+
+        <button type="submit" class="primary-btn">加入行程</button>
+      </form>
+    </section>
+
+    <!-- 行程列表：會依日期分類 -->
+    <section class="card">
+      <h2 id="listTitle">行程列表（全部）</h2>
+      <div id="itemsContainer" class="items-container">
+        <!-- JS 會在這裡插入內容 -->
+      </div>
+    </section>
+
+    <footer class="app-footer">
+      <span>資料只儲存在你的瀏覽器（localStorage）與匯出的 JSON 檔案中。</span>
+	  <span id="syncStatus" class="sync-status">尚未同步</span>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

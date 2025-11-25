@@ -1,0 +1,278 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+    "Noto Sans TC", sans-serif;
+  background: #f5f5f8;
+  color: #222;
+}
+
+.app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.app-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.app-header input {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toolbar-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+button,
+input,
+textarea {
+  font-family: inherit;
+}
+
+button {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+button:hover {
+  border-color: #0077ff;
+}
+
+.primary-btn {
+  background: #0077ff;
+  color: #fff;
+  border-color: #0077ff;
+}
+
+.primary-btn:hover {
+  filter: brightness(1.05);
+}
+
+.import-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid #ccc;
+  background: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.import-label input {
+  display: none;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  margin-bottom: 16px;
+}
+
+.card h2 {
+  margin-top: 0;
+  font-size: 1.2rem;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.form-field {
+  flex: 1 1 180px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-field label {
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+  color: #555;
+}
+
+.form-field input,
+.form-field textarea {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+}
+
+.form-field textarea {
+  resize: vertical;
+}
+
+.items-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.date-group {
+  border-left: 4px solid #0077ff;
+  padding-left: 10px;
+}
+
+.date-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+
+.date-group-title {
+  font-weight: 600;
+}
+
+.date-group-count {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.item-card {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 10px 10px;
+  margin: 6px 0;
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.item-time {
+  font-weight: 600;
+  min-width: 3.5rem;
+  font-size: 0.9rem;
+}
+
+.item-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.item-location {
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.item-note {
+  margin-top: 4px;
+  font-size: 0.85rem;
+  color: #444;
+  white-space: pre-wrap;
+}
+
+.date-empty {
+  font-size: 0.9rem;
+  color: #777;
+}
+
+/* footer */
+.app-footer {
+  font-size: 0.8rem;
+  color: #666;
+  text-align: center;
+  margin-top: 12px;
+}
+
+/* 手機優化 */
+@media (max-width: 600px) {
+  .app {
+    padding: 12px;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .app-header h1 {
+    font-size: 1.4rem;
+  }
+}
+
+/* footer */
+.app-footer {
+  font-size: 0.8rem;
+  color: #666;
+  text-align: center;
+  margin-top: 12px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+/* 同步狀態列 */
+.sync-status {
+  font-size: 0.8rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.sync-pending {
+  color: #b45309;           /* 暗橘色 */
+  border-color: #fbbf24;
+  background: #fffbeb;
+}
+
+.sync-ok {
+  color: #166534;           /* 綠色 */
+  border-color: #4ade80;
+  background: #ecfdf5;
+}
+
+.sync-error {
+  color: #991b1b;           /* 紅色 */
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.sync-neutral {
+  color: #6b7280;
+  border-color: #e5e7eb;
+  background: #f9fafb;
+}
