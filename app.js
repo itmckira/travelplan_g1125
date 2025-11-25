@@ -1,7 +1,7 @@
 // 簡單的旅遊計畫資料結構：會存到 localStorage & 匯出 JSON
 const STORAGE_KEY = "travelPlannerDataV1";
 // ⬇⬇⬇ 這裡填入你剛剛部署出的 Web App URL
-const GOOGLE_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbymjqlPBMixbdbD_eFn5DqmBqSwg1ns_F4OpjNNN8a6y2ur1bTSInkA7Ok6BVbiHRuX/exec";
+const GOOGLE_WEBAPP_URL = "https://script.google.com/macros/library/d/1r43kU5vYpgGQ1iw7BFcAY3ctC1-2cXnx6tlVPUzPG__e902Os6Zc_0tQ/1";
 
 let state = {
   tripName: "",
