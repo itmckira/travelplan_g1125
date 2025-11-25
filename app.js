@@ -29,9 +29,10 @@ document.addEventListener("DOMContentLoaded", () => {
   syncStatusEl = document.getElementById("syncStatus");   // 同步狀態列
   
     // 同步到 Google Sheet
-    syncSheetBtn.addEventListener("click", () => {
-    syncToGoogleSheet(false);  // 手動模式（會跳 alert）
-  });
+	syncSheetBtn.addEventListener("click", () => {
+	  fullSyncWithMerge(false);  // ★ 改成「雙向合併同步」
+	});
+
 
 
   
@@ -84,16 +85,18 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
         state = {
-          tripName: obj.tripName || "",
-          items: obj.items.map((it) => ({
-            id: it.id || String(Date.now()) + Math.random(),
-            date: it.date,
-            time: it.time || "",
-            title: it.title || "",
-            location: it.location || "",
-            note: it.note || "",
-          })),
-        };
+			tripName: obj.tripName || "",
+			items: obj.items.map((it) => ({
+			id: it.id || String(Date.now()) + Math.random(),
+			date: it.date,
+			time: it.time || "",
+			title: it.title || "",
+			location: it.location || "",
+			note: it.note || "",
+			deleted: !!it.deleted,
+			updatedAt: it.updatedAt || new Date().toISOString()
+			})),
+		};
          saveStateToStorage();
         // 重設篩選
         currentFilterDate = "";
@@ -136,14 +139,17 @@ function addItemFromForm(form) {
     return;
   }
 
+  const nowIso = new Date().toISOString();
   const newItem = {
-    id: String(Date.now()) + Math.random(),
-    date,
-    time,
-    title,
-    location,
-    note,
-  };
+	id: String(Date.now()) + Math.random(),
+	date,
+	time,
+	title,
+	location,
+	note,
+	deleted: false,
+	updatedAt: nowIso
+	};
 
   state.items.push(newItem);
   saveStateToStorage();
@@ -173,17 +179,18 @@ function saveStateToStorage() {
 
 // 刪除單一行程
 function deleteItem(id) {
-  const index = state.items.findIndex((it) => it.id === id);
-  if (index === -1) return;
+  const item = state.items.find((it) => it.id === id);
+  if (!item) return;
 
-  state.items.splice(index, 1);
+  item.deleted = true;
+  item.updatedAt = new Date().toISOString(); // ★ 更新最後修改時間
+
   saveStateToStorage();
   render();
-  // 刪除也要自動同步到 Google Sheet
-  if (typeof scheduleAutoSync === "function") {
-    scheduleAutoSync();
-  }
+  scheduleAutoSync();
 }
+
+
 
 // 從 localStorage 載入
 function loadStateFromStorage() {
@@ -252,8 +259,9 @@ function render() {
   const listTitleEl = document.getElementById("listTitle");
   container.innerHTML = "";
 
-  let items = [...state.items];
-
+  //let items = [...state.items];
+  let items = state.items.filter((it) => !it.deleted);
+  
   // 依日期 + 時間排序
   items.sort((a, b) => {
     if (a.date !== b.date) return a.date.localeCompare(b.date);
@@ -454,5 +462,133 @@ async function syncToGoogleSheet(isAuto = false) {
       alert("同步到 Google Sheet 時發生錯誤：" + err.message);
     }
     setSyncStatus("同步失敗（請查看 console）", "error");
+  }
+}
+
+function mergeLocalAndRemote(localState, remoteState) {
+  const localItems = localState.items || [];
+  const remoteItems = remoteState.items || [];
+
+  const localMap = new Map();
+  localItems.forEach((it) => localMap.set(it.id, it));
+
+  const remoteMap = new Map();
+  remoteItems.forEach((it) => remoteMap.set(it.id, it));
+
+  const mergedItems = [];
+  const allIds = new Set([
+    ...Array.from(localMap.keys()),
+    ...Array.from(remoteMap.keys())
+  ]);
+
+  function getTime(it) {
+    return it && it.updatedAt
+      ? it.updatedAt
+      : '1970-01-01T00:00:00.000Z';
+  }
+
+  allIds.forEach((id) => {
+    const l = localMap.get(id);
+    const r = remoteMap.get(id);
+
+    if (l && !r) {
+      mergedItems.push(l);
+    } else if (!l && r) {
+      mergedItems.push(r);
+    } else if (l && r) {
+      const tl = getTime(l);
+      const tr = getTime(r);
+      if (tl >= tr) {
+        mergedItems.push(l);
+      } else {
+        mergedItems.push(r);
+      }
+    }
+  });
+
+  // tripName：簡單策略：
+  // - 若 local 有值，優先 local
+  // - 否則用 remote
+  const mergedTripName = localState.tripName || remoteState.tripName || "";
+
+  return {
+    tripName: mergedTripName,
+    items: mergedItems
+  };
+}
+
+async function fullSyncWithMerge(isAuto = false) {
+  if (!GOOGLE_WEBAPP_URL || GOOGLE_WEBAPP_URL.indexOf("script.google.com") === -1) {
+    if (!isAuto) {
+      alert("尚未設定有效的 Google Web App URL");
+    }
+    setSyncStatus("尚未設定 Google Web App URL", "error");
+    return;
+  }
+
+  try {
+    setSyncStatus("從 Google Sheet 讀取中…", "pending");
+
+    // 1) 先抓雲端資料
+    const resGet = await fetch(GOOGLE_WEBAPP_URL, { method: "GET" });
+    if (!resGet.ok) throw new Error("GET HTTP " + resGet.status);
+    const remote = await resGet.json();
+    if (!remote.ok) throw new Error(remote.message || "GET 回傳錯誤");
+
+    const remoteState = {
+      tripName: remote.tripName || "",
+      items: Array.isArray(remote.items)
+        ? remote.items.map((it) => ({
+            id: it.id || String(Date.now()) + Math.random(),
+            date: it.date || "",
+            time: it.time || "",
+            title: it.title || "",
+            location: it.location || "",
+            note: it.note || "",
+            deleted: !!it.deleted,
+            updatedAt: it.updatedAt || "1970-01-01T00:00:00.000Z",
+          }))
+        : [],
+    };
+
+    // 2) 和本機 state 合併
+    const merged = mergeLocalAndRemote(state, remoteState);
+
+    // 3) 把 merged 視為「最新真相」：存到本機 & 畫面更新
+    state = merged;
+    saveStateToStorage();
+    currentFilterDate = "";
+    document.getElementById("filterDate").value = "";
+    document.getElementById("tripNameInput").value = state.tripName;
+    render();
+
+    setSyncStatus("合併完成，回寫 Google Sheet 中…", "pending");
+
+    // 4) 再把 merged 整包 POST 回去，讓 Sheet 也更新（Upsert）
+    const resPost = await fetch(GOOGLE_WEBAPP_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8",
+      },
+      body: JSON.stringify(state),
+    });
+
+    if (!resPost.ok) throw new Error("POST HTTP " + resPost.status);
+    const postResp = await resPost.json().catch(() => ({}));
+    if (!postResp.ok) {
+      throw new Error(postResp.message || "POST 回傳錯誤");
+    }
+
+    const now = new Date();
+    setSyncStatus(
+      `雙向合併完成（新增 ${postResp.inserted || 0}, 更新 ${postResp.updated || 0}） ${formatTime(now)}`,
+      "ok"
+    );
+  } catch (err) {
+    console.error(err);
+    if (!isAuto) {
+      alert("雙向同步時發生錯誤：" + err.message);
+    }
+    setSyncStatus("雙向同步失敗", "error");
   }
 }
